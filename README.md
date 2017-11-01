@@ -1,34 +1,170 @@
-[![Build Status](https://travis-ci.org/node-bash/bash-tree.svg?branch=master)](https://travis-ci.org/node-bash/bash-tree)
-[![Coverage](https://codecov.io/gh/node-bash/bash-tree/branch/master/graph/badge.svg)](https://codecov.io/gh/node-bash/bash-tree)
-<!-- optional appveyor tst
-[![Windows Build Status](https://ci.appveyor.com/api/projects/status/github/node-bash/bash-tree?branch=master&svg=true)](https://ci.appveyor.com/project/node-bash/bash-tree)
--->
-<!-- optional npm version
-[![NPM version](https://badge.fury.io/js/bash-tree.svg)](http://badge.fury.io/js/bash-tree)
--->
-<!-- optional npm downloads
-[![npm module downloads per month](http://img.shields.io/npm/dm/bash-tree.svg)](https://www.npmjs.org/package/bash-tree)
--->
-<!-- optional dependency status
-[![Dependency Status](https://david-dm.org/node-bash/bash-tree.svg)](https://david-dm.org/node-bash/bash-tree)
--->
+- [Node objects](#node-objects)
+- [Identifier](#identifier)
+- [Literal](#literal)
+- [Program](#program)
+- [Functions](#function)
+- [Declarations](#declarations)
+  - [VariableDeclaration](#variabledeclaration)
 
-# bash-tree
-
-<!-- description -->
-
-## Install
-
-```sh
-$ npm install bash-tree
-```
-
-## Usage
+# Node Objects
 
 ```js
-import bash_tree from 'bash-tree'
+interface Node {
+  type: string
+  loc: SourceLocation | null
+}
 ```
 
-## License
+```js
+interface SourceLocation {
+  source: string | null
+  start: Position
+  end: Position
+}
+```
 
-MIT
+```js
+interface Position {
+  line: number   // 1-indexed
+  column: number // 0-indexed
+}
+```
+
+# Identifier
+
+```js
+interface Identifier : Node {
+  type: "Identifier"
+  name: string
+}
+```
+
+# Program
+
+```js
+interface Program : Node {
+  type: "Program"
+  body: [ Statement ]
+}
+```
+
+The whole bash program tree
+
+# FunctionDeclaration
+
+```js
+interface FunctionDeclaration : Node {
+  type: "FunctionDeclaration"
+  id: Identifier
+  body: [ Statement ]
+}
+```
+
+A function declaration
+
+# Statement
+
+```js
+interface Statement : Node {}
+```
+
+# VariableAssignment
+
+```js
+interface VariableAssignment : Statement {
+  type: "VariableAssignment"
+  left: Identifier
+  right: Expression
+}
+```
+
+# VariableDeclaration
+
+```js
+interface VariableDeclaration : Statement {
+  type: "VariableDeclaration"
+  id: Identifier
+  kind: "a" | "i" | "r" | "local"
+  init: Expression | null
+}
+```
+
+# Expression
+
+```js
+interface Expression : Node {}
+```
+
+## Literal
+
+```js
+interface Literal : Expression {
+  type: "Literal"
+  // 'a'
+  value: string
+  // '"a"'
+  raw: string
+}
+```
+
+## ArrayExpression
+
+```js
+interface ArrayExpression : Expression {
+  type: "ArrayExpression"
+  elements: []
+}
+```
+
+## Substitution
+
+### CommandSubstitution
+
+```js
+interface CommandSubstitution : Expression {
+  type: "CommandSubstitution"
+  command: Command
+  kind: "backtick" | "bracket"
+}
+```
+
+### StringSubstitution
+
+```js
+// "$a"
+interface StringSubstitution : Expression {
+  type: "StringSubstitution"
+  contents: [ Literal | VariableSubstitution ]
+}
+```
+
+### VariableSubstitution
+
+```js
+// $a
+interface VariableSubstitution : Expression {
+  type: "VariableSubstitution"
+  
+}
+```
+
+# Command
+
+```js
+interface Command {
+  type: "Command"
+  name: string
+  argv: Arguments
+}
+```
+
+# Arguments
+
+```js
+interface Arguments {
+  type: "Arguments"
+  args: [ Expression ]
+}
+```
+
+The length of the arguments depends on the result of substitution
