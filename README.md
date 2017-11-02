@@ -44,16 +44,52 @@ interface Identifier : Node {
 ```js
 interface Program : Node {
   type: "Program"
-  body: [ Statement ]
+  body: BlockStatement
 }
 ```
 
 The whole bash program tree
 
-# FunctionDeclaration
+# BlockStatement
 
 ```js
-interface FunctionDeclaration : Node {
+interface BlockStatement : Node {
+  type: "BlockStatement"
+  body: [ Statement ]
+}
+```
+
+# Comparison
+
+```
+```
+
+## BinaryComparison
+
+# Statement
+
+```js
+interface Statement : Node {}
+```
+
+A statement is a thing that can stand alone.
+
+## Control Flow
+
+### IfStatements
+
+```js
+interface IfStatement : Statement {
+  type: "IfStatement"
+  test: [ Comparison | Command ]
+  consequent: BlockStatement
+}
+```
+
+## FunctionDeclaration
+
+```js
+interface FunctionDeclaration : Statement {
   type: "FunctionDeclaration"
   id: Identifier
   body: [ Statement ]
@@ -62,15 +98,10 @@ interface FunctionDeclaration : Node {
 
 A function declaration
 
-# Statement
+## VariableAssignment
 
 ```js
-interface Statement : Node {}
-```
-
-# VariableAssignment
-
-```js
+// a=1
 interface VariableAssignment : Statement {
   type: "VariableAssignment"
   left: Identifier
@@ -78,22 +109,48 @@ interface VariableAssignment : Statement {
 }
 ```
 
-# VariableDeclaration
+## VariableDeclaration
 
 ```js
 interface VariableDeclaration : Statement {
   type: "VariableDeclaration"
   id: Identifier
+  // declare -a a=1
   kind: "a" | "i" | "r" | "local"
   init: Expression | null
 }
 ```
+
+Actually `declare -a a=foo` is a command, but it is better to be treated as a `Statement` due to its complication.
+
+## Command
+
+```js
+interface Command : Statement {
+  type: "Command"
+  name: string
+  argv: Arguments
+}
+```
+
+# Arguments
+
+```js
+interface Arguments {
+  type: "Arguments"
+  args: [ Expression ]
+}
+```
+
+The length of the arguments depends on the result of substitution
 
 # Expression
 
 ```js
 interface Expression : Node {}
 ```
+
+An expression is what can be used as "value".
 
 ## Literal
 
@@ -144,27 +201,6 @@ interface StringSubstitution : Expression {
 // $a
 interface VariableSubstitution : Expression {
   type: "VariableSubstitution"
-  
+
 }
 ```
-
-# Command
-
-```js
-interface Command {
-  type: "Command"
-  name: string
-  argv: Arguments
-}
-```
-
-# Arguments
-
-```js
-interface Arguments {
-  type: "Arguments"
-  args: [ Expression ]
-}
-```
-
-The length of the arguments depends on the result of substitution
