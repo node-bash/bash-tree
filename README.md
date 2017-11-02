@@ -59,6 +59,87 @@ interface BlockStatement : Node {
 }
 ```
 
+# ArithmeticOperation
+
+## UnaryOperation
+
+```js
+interface UnaryOperation : ArithmeticOperation {
+  type: "UnaryOperation"
+  operator: UnaryOperator
+  prefix: boolean
+  argument: Identifier
+}
+```
+
+```js
+enum UnaryOperator {
+  "-"
+}
+```
+
+## UpdateOperation
+
+```js
+interface UpdateOperation : ArithmeticOperation {
+  type: "UpdateOperation"
+  operator: UpdateOperator
+  argument: Identifier
+  prefix: boolean
+}
+```
+
+```js
+enum UpdateOperator {
+  "++" | "--"
+}
+```
+
+## BinaryOperation
+
+```js
+interface BinaryOperation : ArithmeticOperation {
+  type: "BinaryOperation"
+  operator: BinaryOperator
+  left: Identifier
+}
+```
+
+```js
+enum BinaryOperator {
+  "+" | "-"
+}
+```
+
+## ConditionalOperation
+
+```js
+// Ternary
+interface ConditionalOperation : ArithmeticOperation {
+  type: "TernaryOperation"
+  test: ArithmeticOperation
+  alternate: Literal | ArithmeticOperation
+  consequent: Literal | ArithmeticOperation
+}
+```
+
+## LogicalOperation
+
+```js
+interface LogicalOperation : ArithmeticOperation {
+  type: "LogicalOperation"
+  operator: LogicalOperator
+  left: ArithmeticOperation
+  right: ArithmeticOperation
+}
+```
+
+```js
+enum LogicalOperator {
+  "||" | "&&"
+}
+```
+
 # Statement
 
 ```js
@@ -76,7 +157,14 @@ interface SubShell : Statement {
 }
 ```
 
-## AritheticStatement
+## ArithmeticStatement
+
+```js
+// ((  ))
+interface ArithmeticStatement : Statement {
+
+}
+```
 
 ## Control Flow
 
@@ -202,6 +290,7 @@ interface ExtendedBraceExpansion : Expansion {
   type: "ExtendedBraceExpansion"
   start: Literal
   end: Literal
+  // foo{a..z} | {1..9}{a..z}
   prefix: Literal | Expansion
   suffix: Literal
 }
@@ -278,7 +367,7 @@ interface VariableSubstitution : Expression {
 // $(( 2 + 3))
 interface ArithmeticSubstitution : Expression {
   type: "ArithmeticSubstitution"
-  contents:
+  content: ArithmeticStatement
 }
 ```
 
