@@ -1,3 +1,5 @@
+# The BashTree Spec
+
 - [Node objects](#node-objects)
 - [Identifier](#identifier)
 - [Literal](#literal)
@@ -59,6 +61,50 @@ interface BlockStatement : Node {
 }
 ```
 
+# Redirection
+
+
+
+#
+
+# TestOperation
+
+```js
+interface TestOperation {
+  type: "TestOperation"
+  operator: FileTestOperator | TestOperator
+  left: Expression | null
+  right: Expression
+}
+```
+
+```js
+enum FileTestOperator {
+  // TODO
+  "-e"
+}
+```
+
+```js
+enum TestOperator {
+  // TODO
+  "-eq"
+}
+```
+
+# HereDocument
+
+```js
+interface HereDocument {
+  type: "HereDocument"
+  limitString: string
+  // TODO: maybe substitution should be down at runtime, not at compiling
+  documents: [ Literal | Substitution ]
+  suppressLeadingTabs: boolean
+  enableSubstitution: boolean
+}
+```
+
 # ArithmeticOperation
 
 ## UnaryOperation
@@ -107,7 +153,12 @@ interface BinaryOperation : ArithmeticOperation {
 
 ```js
 enum BinaryOperator {
-  "+" | "-"
+  // TODO: more
+  "+" | "-" | "*" | "/" |
+  "**" | "%" |
+  "+=" | "-=" | "*=" | "/=" | "%=" |
+  "<<" | "<<=" | ">>" | ">>=" | "&" | "&=" | "|" | "|=" | "~" | "^" | "^="
+  ">" | "<"
 }
 ```
 
@@ -129,14 +180,14 @@ interface ConditionalOperation : ArithmeticOperation {
 interface LogicalOperation : ArithmeticOperation {
   type: "LogicalOperation"
   operator: LogicalOperator
-  left: ArithmeticOperation
+  left: ArithmeticOperation || null
   right: ArithmeticOperation
 }
 ```
 
 ```js
 enum LogicalOperator {
-  "||" | "&&"
+  "||" | "&&" || "!"
 }
 ```
 
@@ -162,7 +213,8 @@ interface SubShell : Statement {
 ```js
 // ((  ))
 interface ArithmeticStatement : Statement {
-
+  type: "ArithmeticStatement"
+  operation: ArithmeticOperation
 }
 ```
 
@@ -175,7 +227,7 @@ interface ArithmeticStatement : Statement {
 ```js
 interface IfStatement : Statement {
   type: "IfStatement"
-  test: [ Comparison | Command ]
+  test: ArithmeticStatement | Command | TestConstruct
   consequent: BlockStatement
   alternate: Statement | null
   kind: "elif" | "else if" | null
@@ -263,7 +315,7 @@ interface MemberConstruct : Construct {
 ```js
 interface TestConstruct {
   type: "TestConstruct"
-  condition:
+  condition: Expression |
   // [] | [[]]
   kind: "test" | "extended"
 }
