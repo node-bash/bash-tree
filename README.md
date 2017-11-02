@@ -59,29 +59,6 @@ interface BlockStatement : Node {
 }
 ```
 
-# Test
-
-## TestConstruct
-
-```js
-interface TestConstruct {
-  type: "TestConstruct"
-  condition:
-  kind: "test" | "extended"
-}
-```
-
-## BinaryComparison
-
-```js
-interface BinaryComparison : Comparison {
-  type: "BinaryComparison"
-  operator: string
-  left: Identifier
-  right: Expression
-}
-```
-
 # Statement
 
 ```js
@@ -89,6 +66,15 @@ interface Statement : Node {}
 ```
 
 A statement is a thing that can stand alone.
+
+## SubShell
+
+```js
+interface SubShell : Statement {
+  type: "SubShell"
+  body: BlockStatement
+}
+```
 
 ## AritheticStatement
 
@@ -128,12 +114,12 @@ A function declaration
 interface VariableAssignment : Statement {
   type: "VariableAssignment"
   // a=1 | a[1]=1
-  left: Identifier | MemberConstruct
+  left: Identifier | ArrayMemberConstruct
   right: Expression
 }
 ```
 
-## VariableDeclaration
+## VariableDeclaration (?)
 
 ```js
 interface VariableDeclaration : Statement {
@@ -174,11 +160,50 @@ The length of the arguments depends on the result of substitution
 interface Construct : Node {}
 ```
 
-## MemberConstruct
+## ArrayMemberConstruct
 
 ```js
 interface MemberConstruct : Construct {
+  type: "ArrayMemberConstruct"
+  array: Identifier
+  property: Literal
+}
+```
 
+## TestConstruct
+
+```js
+interface TestConstruct {
+  type: "TestConstruct"
+  condition:
+  // [] | [[]]
+  kind: "test" | "extended"
+}
+```
+
+## Expansion
+
+### BraceExpansion
+
+```js
+interface BraceExpansion : Expansion {
+  type: "BraceExpansion"
+  expansions: [ Literal ]
+  prefix: Literal | Expansion
+  suffix: Literal
+}
+```
+
+### ExtendedBraceExpansion
+
+```js
+// {a..z}
+interface ExtendedBraceExpansion : Expansion {
+  type: "ExtendedBraceExpansion"
+  start: Literal
+  end: Literal
+  prefix: Literal | Expansion
+  suffix: Literal
 }
 ```
 
@@ -237,9 +262,110 @@ interface StringSubstitution : Expression {
 ### VariableSubstitution
 
 ```js
-// $a
+// ${a:-default}
 interface VariableSubstitution : Expression {
   type: "VariableSubstitution"
+  kind: "brace" | "no-brace"
+  // null for positional variables
+  id: Identifier | null
+  pattern: VariableDirective | null
+}
+```
 
+### ArithmeticSubstitution
+
+```js
+// $(( 2 + 3))
+interface ArithmeticSubstitution : Expression {
+  type: "ArithmeticSubstitution"
+  contents:
+}
+```
+
+### ProcessSubstitution
+
+```js
+interface ProcessSubstitution : Expression {
+  type: "ProcessSubstitution"
+  command: Command
+  // >() | <()
+  kind: "in" | "out"
+}
+```
+
+# VariableDirective
+
+## MemberAccessDirective
+
+```js
+interface MemberAccessDirective : VariableDirective {
+  type: "MemberAccessDirective"
+  property: Literal
+}
+```
+
+## GetterDirective
+
+```js
+// value[kind]arg
+interface GetterDirective : VariableDirective {
+  type: "GetterDirective"
+  kind: "-" | ":-" | "=" | ":=" | "+" | ":+" | "?" | ":?"
+  arg: Literal | Expression
+}
+```
+
+## LengthDirective
+
+```js
+// #value[property]
+interface LengthDirective : VariableDirective {
+  type: "LengthDirective"
+  property: "*" | "@" | null
+}
+```
+
+## CropDirective
+
+```js
+// value[kind]pattern
+interface CropDirective : VariableDirective {
+  type: "CropDirective"
+  pattern: Literal | Expression
+  kind: "#" | "##" | "%" | "%%"
+}
+```
+
+## SliceDirective
+
+```js
+// value:start[:end]
+interface SliceDirective : VariableDirective {
+  type: "SliceDirective"
+  start: Literal
+  end: Literal | null
+}
+```
+
+## ReplaceDirective
+
+```js
+// value/[kind]pattern/replacement
+interface ReplaceDirective : VariableDirective {
+  type: "ReplaceDirective"
+  pattern: Literal
+  replacement: Literal
+  kind: "/" | "#" | "%" | null
+}
+```
+
+## SearchDirective
+
+```js
+// !value[kind]
+interface SearchDirective : VariableDirective {
+  type: "SearchDirective"
+  // the same
+  kind: "*" | "@"
 }
 ```
