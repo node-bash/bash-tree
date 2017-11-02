@@ -59,12 +59,28 @@ interface BlockStatement : Node {
 }
 ```
 
-# Comparison
+# Test
 
-```
+## TestConstruct
+
+```js
+interface TestConstruct {
+  type: "TestConstruct"
+  condition:
+  kind: "test" | "extended"
+}
 ```
 
 ## BinaryComparison
+
+```js
+interface BinaryComparison : Comparison {
+  type: "BinaryComparison"
+  operator: string
+  left: Identifier
+  right: Expression
+}
+```
 
 # Statement
 
@@ -74,17 +90,25 @@ interface Statement : Node {}
 
 A statement is a thing that can stand alone.
 
+## AritheticStatement
+
 ## Control Flow
 
-### IfStatements
+## Choice
+
+### IfStatement
 
 ```js
 interface IfStatement : Statement {
   type: "IfStatement"
   test: [ Comparison | Command ]
   consequent: BlockStatement
+  alternate: Statement | null
+  kind: "elif" | "else if" | null
 }
 ```
+
+### CaseStatement
 
 ## FunctionDeclaration
 
@@ -101,10 +125,10 @@ A function declaration
 ## VariableAssignment
 
 ```js
-// a=1
 interface VariableAssignment : Statement {
   type: "VariableAssignment"
-  left: Identifier
+  // a=1 | a[1]=1
+  left: Identifier | MemberConstruct
   right: Expression
 }
 ```
@@ -144,13 +168,27 @@ interface Arguments {
 
 The length of the arguments depends on the result of substitution
 
+# Construct
+
+```js
+interface Construct : Node {}
+```
+
+## MemberConstruct
+
+```js
+interface MemberConstruct : Construct {
+
+}
+```
+
 # Expression
 
 ```js
 interface Expression : Node {}
 ```
 
-An expression is what can be used as "value".
+An expression is what can be assigned to identifiers or as the item of arguments.
 
 ## Literal
 
@@ -169,7 +207,7 @@ interface Literal : Expression {
 ```js
 interface ArrayExpression : Expression {
   type: "ArrayExpression"
-  elements: []
+  elements: Arguments
 }
 ```
 
@@ -181,6 +219,7 @@ interface ArrayExpression : Expression {
 interface CommandSubstitution : Expression {
   type: "CommandSubstitution"
   command: Command
+  // `command -r` | $(command -r)
   kind: "backtick" | "bracket"
 }
 ```
